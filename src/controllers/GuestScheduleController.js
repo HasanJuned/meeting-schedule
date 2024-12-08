@@ -1,5 +1,6 @@
 const HostScheduleModel = require('../models/HostScheduleModel');
 const GuestProfileModel = require('../models/GuestProfileModel');
+const { DateTime } = require('luxon');
 
 exports.searchSchedules = async (req, res) => {
   const { date, time, hostName } = req.body;
@@ -36,10 +37,23 @@ exports.searchSchedules = async (req, res) => {
 };
 
 exports.allSchedules = async (req, res) => {
-
   try {
     const schedules = await HostScheduleModel.find();
-    res.status(200).json({ message:'success', data: schedules });
+
+    // Convert date-time fields to desired format
+    const convertedSchedules = schedules.map(schedule => {
+      if (schedule.startTime) { // Ensure startTime exists
+        schedule.startTime = DateTime.fromISO(schedule.startTime) // Parse using the given timezone in the input
+            .toFormat('hh:mm a'); // Format to 12-hour time with AM/PM
+      }
+      if (schedule.endTime) { // Ensure endTime exists
+        schedule.endTime = DateTime.fromISO(schedule.endTime) // Parse using the given timezone in the input
+            .toFormat('hh:mm a'); // Format to 12-hour time with AM/PM
+      }
+      return schedule;
+    });
+
+    res.status(200).json({ message: 'success', data: convertedSchedules });
   } catch (error) {
     res.status(500).json({ message: 'fail', data: error });
   }

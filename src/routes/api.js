@@ -20,12 +20,6 @@ router.get('/host/mostBooked/:hostEmail', HostAuthVerifyMiddleware, HostDashBoar
 router.get('/host/popularBookingTime/:hostEmail', HostAuthVerifyMiddleware, HostDashBoardController.popularBookingTime)
 router.get('/host/meetings/today/:hostEmail/:startDate', HostAuthVerifyMiddleware, HostDashBoardController.countTodaysMeetings);
 
-// router.get('/ProfileDetails', HostAuthVerifyMiddleware, HostAuthController.ProfileDetails)
-// router.post('/ProfileUpdate', HostAuthVerifyMiddleware, HostAuthController.ProfileUpdate)
-// router.get("/RecoverVerifyEmail/:email",HostAuthController.RecoverVerifyEmail);
-// router.get("/RecoverVerifyOTP/:email/:otp",HostAuthController.RecoverVerifyOtp);
-// router.post("/RecoverResetPassword",HostAuthController.RecoverResetPassword);
-
 /// guest
 router.post('/guest/registration', GuestAuthController.Registration)
 router.post('/guest/login', GuestAuthController.Login)
@@ -37,12 +31,6 @@ router.get('/guest/schedules', GuestScheduleController.allSchedules)
 router.get('/guest/bookschedule/:scheduleId/:fullName', GuestScheduleController.bookSchedule);
 
 
-
-// router.post("/createTask",HostAuthVerifyMiddleware,TasksController.createTask);
-// router.get("/deleteTask/:id",HostAuthVerifyMiddleware,TasksController.deleteTask);
-// router.get("/updateTaskStatus/:id/:status",HostAuthVerifyMiddleware,TasksController.updateTaskStatus);
-// router.get("/listTaskByStatus/:status",HostAuthVerifyMiddleware,TasksController.listTaskByStatus);
-// router.get("/taskStatusCount",HostAuthVerifyMiddleware,TasksController.taskStatusCount);
 
 
 module.exports = router;
