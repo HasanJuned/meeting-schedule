@@ -16,6 +16,35 @@ exports.mostBooked = async (req, res) => {
   }
 };
 
+exports.countTodaysMeetings = async (req, res) => {
+  try {
+    //const { hostEmail, hostDate } = req.params;
+    let hostEmail = req.params.hostEmail;
+    let hostDate = req.params.startDate;
+
+    if (!hostEmail || !hostDate) {
+      return res.status(400).json({
+        message: 'Both hostEmail and hostDate parameters are required.',
+      });
+    }
+
+    const totalMeeting = await HostScheduleModel.countDocuments({
+      hostEmail,
+      startDate: hostDate,
+    });
+
+    if (totalMeeting === 0) {
+      return res.status(404).json({ message: 'No schedules found for this email and date.' });
+    }
+
+    res.status(200).send({ message: 'success', data: totalMeeting });
+  } catch (error) {
+    // Handle any errors and send a response
+    res.status(500).send({ message: 'fail', data: error.toString() });
+  }
+};
+
+
 exports.popularBookingTime = async (req, res) => {
   try {
     const { hostEmail } = req.params;

@@ -59,3 +59,20 @@ exports.Profile=async (req,res)=>{
   }
 
 }
+
+exports.BookedByUser = async (req, res) => {
+  let guestEmail = req.params.email;
+
+  try {
+    let result = await GuestProfileModel.findOne({ email: guestEmail });
+
+    if (result) {
+      return res.status(200).json({ status: "success", data: result });
+    } else {
+      return res.status(404).json({ status: "fail", data: 'No registration found with this email.' });
+    }
+  } catch (e) {
+    res.status(500).json({ status: "fail", data: 'An error occurred. Please try again.' });
+  }
+};
+

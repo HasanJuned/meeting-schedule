@@ -18,7 +18,7 @@ router.post('/host/edit/:scheduleId', HostAuthVerifyMiddleware, HostScheduleCont
 router.get('/host/delete/:hostEmail/:scheduleId', HostAuthVerifyMiddleware, HostScheduleController.deleteSchedule)
 router.get('/host/mostBooked/:hostEmail', HostAuthVerifyMiddleware, HostDashBoardController.mostBooked)
 router.get('/host/popularBookingTime/:hostEmail', HostAuthVerifyMiddleware, HostDashBoardController.popularBookingTime)
-
+router.get('/host/meetings/today/:hostEmail/:startDate', HostAuthVerifyMiddleware, HostDashBoardController.countTodaysMeetings);
 
 // router.get('/ProfileDetails', HostAuthVerifyMiddleware, HostAuthController.ProfileDetails)
 // router.post('/ProfileUpdate', HostAuthVerifyMiddleware, HostAuthController.ProfileUpdate)
@@ -31,9 +31,10 @@ router.post('/guest/registration', GuestAuthController.Registration)
 router.post('/guest/login', GuestAuthController.Login)
 router.post('/guest/profile', GuestAuthVerifyMiddleware, GuestAuthController.Profile)
 
+
 router.post('/guest/search', GuestScheduleController.searchSchedules)
 router.get('/guest/schedules', GuestScheduleController.allSchedules)
-router.post('/guest/bookschedule/:scheduleId', GuestAuthVerifyMiddleware, GuestScheduleController.bookSchedule);
+router.get('/guest/bookschedule/:scheduleId/:email', GuestScheduleController.bookSchedule);
 
 
 
