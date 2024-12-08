@@ -34,7 +34,7 @@ router.post('/guest/profile', GuestAuthVerifyMiddleware, GuestAuthController.Pro
 
 router.post('/guest/search', GuestScheduleController.searchSchedules)
 router.get('/guest/schedules', GuestScheduleController.allSchedules)
-router.get('/guest/bookschedule/:scheduleId/:email', GuestScheduleController.bookSchedule);
+router.get('/guest/bookschedule/:scheduleId/:fullName', GuestScheduleController.bookSchedule);
 
 
 

@@ -29,7 +29,7 @@ exports.searchSchedules = async (req, res) => {
       return res.status(404).json({ message: 'No schedules found matching the filters.' });
     }
 
-    res.status(200).json({ schedules });
+    res.status(200).json({message:'success' , schedules });
   } catch (error) {
     res.status(500).json({ message: 'Failed to search schedules', error });
   }
@@ -47,7 +47,7 @@ exports.allSchedules = async (req, res) => {
 
 exports.bookSchedule = async (req, res) => {
   const { scheduleId } = req.params; // Get the schedule ID and guest email from the URL parameters
-  let guestEmail = req.params.email;
+  let guestEmail = req.params.fullName;
   try {
     // Find the schedule that is available for booking
     const schedule = await HostScheduleModel.findOne({ _id: scheduleId, status: 'available' });
@@ -83,7 +83,7 @@ exports.bookSchedule = async (req, res) => {
     await schedule.save();
 
     // Find the guest profile by email to include their info in the response
-    const guestInfo = await GuestProfileModel.findOne({ email: guestEmail});
+    const guestInfo = await GuestProfileModel.findOne({ fullName: guestEmail});
 
     if (!guestInfo) {
       return res.status(404).json({ message: 'Guest not found with this email.' });
@@ -101,6 +101,7 @@ exports.bookSchedule = async (req, res) => {
     res.status(500).json({ message: 'Failed to book schedule', error: error.toString() });
   }
 };
+
 
 
 
