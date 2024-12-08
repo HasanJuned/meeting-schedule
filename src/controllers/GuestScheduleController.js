@@ -13,12 +13,10 @@ exports.searchSchedules = async (req, res) => {
     filter.startDate = { $gte: startOfDay, $lte: endOfDay }; // Match the date range
   }
 
-  // If time is provided, filter by the exact start time (no ranges, exact match)
   if (time) {
     filter.startTime = time; // Match startTime exactly
   }
 
-  // If hostEmail is provided, filter by hostEmail (case-insensitive match)
   if (hostName) {
     filter.hostEmail = { $regex: hostName, $options: 'i' }; // Case-insensitive match for hostEmail
   }
@@ -50,21 +48,34 @@ exports.bookSchedule = async (req, res) => {
   const { scheduleId } = req.params; // Get the schedule ID from the URL parameter
 
   try {
-    const schedule = await HostScheduleModel.findOne({ _id: scheduleId });
+    const schedule = await HostScheduleModel.findOne({ _id: scheduleId, status: 'available' });
 
     if (!schedule) {
-      return res.status(404).json({ message: 'Schedule not found.' });
+      return res.status(404).json({ message: 'Schedule not found or not available for booking.' });
     }
 
+    const overlappingBookings = await HostScheduleModel.find({
+      hostEmail: schedule.hostEmail,
+      status: 'booked',
+      startTime: { $lt: new Date(schedule.endTime) },
+      endTime: { $gt: new Date(schedule.startTime) },
+    });
+
+    if (overlappingBookings.length > 0) {
+      return res.status(400).json({ message: 'Conflict with another booked schedule.' });
+    }
+
+    // Handle overbooking
     if (schedule.count === 0) {
-      return res.status(400).json({ message: 'This schedule is already booked.' });
+      return res.status(400).json({ message: 'This schedule is already fully booked.' });
     }
 
     schedule.count -= 1;
     if (schedule.count === 0) {
       schedule.status = 'booked';
     }
-    await schedule.save();
+
+    await schedule.save(); // Save the updated schedule
 
     res.status(200).json({
       message: 'Schedule booked successfully.',
