@@ -110,17 +110,16 @@ exports.bookSchedule = async (req, res) => {
 
     await schedule.save();
 
-    const guestInfo = await GuestProfileModel.findOne({ fullName: guestEmail});
+    //const guestInfo = await GuestProfileModel.findOne({ fullName: guestEmail});
 
-    if (!guestInfo) {
-      return res.status(404).json({ message: 'Guest not found with this email.' });
-    }
+    // if (!guestInfo) {
+    //   return res.status(404).json({ message: 'Guest not found with this email.' });
+    // }
 
     res.status(200).json({
       message: 'Schedule booked successfully.',
       data: {
         schedule: schedule,
-        guest: guestInfo,
       },
     });
   } catch (error) {
