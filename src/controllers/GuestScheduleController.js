@@ -63,14 +63,12 @@ exports.bookSchedule = async (req, res) => {
   const { scheduleId } = req.params; // Get the schedule ID and guest email from the URL parameters
   let guestEmail = req.params.fullName;
   try {
-    // Find the schedule that is available for booking
     const schedule = await HostScheduleModel.findOne({ _id: scheduleId, status: 'available' });
 
     if (!schedule) {
       return res.status(404).json({ message: 'Schedule not found or not available for booking.' });
     }
 
-    // Check if there are any overlapping bookings
     const overlappingBookings = await HostScheduleModel.find({
       hostEmail: schedule.hostEmail,
       status: 'booked',

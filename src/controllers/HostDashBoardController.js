@@ -1,4 +1,7 @@
 const HostScheduleModel = require('../models/HostScheduleModel');
+const { DateTime } = require('luxon');
+
+
 
 exports.mostBooked = async (req, res) => {
   try {
@@ -10,12 +13,38 @@ exports.mostBooked = async (req, res) => {
       return res.status(404).json({ message: 'No schedules found for this host.' });
     }
 
-    res.status(200).send({ message: 'success', data: schedules });
+    // Convert startDate and endDate to display only the date in YYYY-MM-DD format
+    const convertedSchedules = schedules.map(schedule => {
+      // Format the startDate to display only the date (YYYY-MM-DD), ignoring the time part
+      if (schedule.startDate) {
+        schedule.startDate = DateTime.fromISO(schedule.startDate).toFormat('yyyy-MM-dd');
+      }
+
+      // Format the endDate to display only the date (YYYY-MM-DD), ignoring the time part
+      if (schedule.endDate) {
+        schedule.endDate = DateTime.fromISO(schedule.endDate).toFormat('yyyy-MM-dd');
+      }
+
+      if (schedule.startTime) {
+        // Convert startTime to 12-hour time with AM/PM
+        schedule.startTime = DateTime.fromISO(schedule.startTime) // Parse as ISO string
+            .toFormat('hh:mm a'); // Format to 12-hour time with AM/PM
+      }
+
+      if (schedule.endTime) {
+        // Convert endTime to 12-hour time with AM/PM
+        schedule.endTime = DateTime.fromISO(schedule.endTime) // Parse as ISO string
+            .toFormat('hh:mm a'); // Format to 12-hour time with AM/PM
+      }
+
+      return schedule;
+    });
+
+    res.status(200).send({ message: 'success', data: convertedSchedules });
   } catch (e) {
     res.status(400).send({ message: 'fail', data: e.toString() });
   }
 };
-
 exports.countTodaysMeetings = async (req, res) => {
   try {
     //const { hostEmail, hostDate } = req.params;
@@ -49,30 +78,26 @@ exports.popularBookingTime = async (req, res) => {
   try {
     const { hostEmail } = req.params;
 
-    // Fetch all schedules for the given host
     const schedules = await HostScheduleModel.find({ hostEmail: hostEmail });
 
     if (!schedules || schedules.length === 0) {
       return res.status(404).json({ message: 'No schedules found for this host.' });
     }
 
-    // Filter for "booked" schedules only
     const bookedSchedules = schedules.filter(schedule => schedule.status === "booked");
 
     if (bookedSchedules.length === 0) {
       return res.status(404).json({ message: 'No booked schedules found for this host.' });
     }
 
-    // Debugging: Log booked schedules to see what data we have
     console.log('Booked Schedules:', bookedSchedules);
 
-    // Group by startTime and count bookings at each time
     const timeBookings = bookedSchedules.reduce((acc, schedule) => {
       const startTime = schedule.startTime;
 
       if (!startTime) {
         console.log('Skipping schedule with no startTime:', schedule);
-        return acc; // Skip invalid schedules without startTime
+        return acc;
       }
 
       if (!acc[startTime]) {
@@ -83,15 +108,12 @@ exports.popularBookingTime = async (req, res) => {
       return acc;
     }, {});
 
-    // Debugging: Log timeBookings object
     console.log('Grouped Time Bookings:', timeBookings);
 
-    // Sort times by the number of bookings, in descending order
     const sortedTimes = Object.entries(timeBookings)
     .sort((a, b) => b[1] - a[1])  // Sort by count in descending order
         .map(([time, count]) => ({ time, count }));
 
-    // Debugging: Log sorted times
     console.log('Sorted Times:', sortedTimes);
 
     res.status(200).send({ message: 'success', data: sortedTimes });
