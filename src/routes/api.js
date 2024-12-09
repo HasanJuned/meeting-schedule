@@ -27,9 +27,13 @@ router.post('/guest/profile', GuestAuthVerifyMiddleware, GuestAuthController.Pro
 
 
 router.post('/guest/search', GuestScheduleController.searchSchedules)
-router.get('/guest/schedules', GuestScheduleController.allSchedules)
+router.get('/guest/schedules', GuestScheduleController.allSchedules) /// also used for admin panel
 router.get('/guest/bookschedule/:scheduleId/:fullName', GuestScheduleController.bookSchedule);
+router.get('/guest/allGuest', GuestScheduleController.allGuest)
 
+/// admin
+router.get('/guest/allGuest', GuestScheduleController.allGuest)
+router.get('/guest/deleteallGuest/:id', GuestScheduleController.deleteallGuest)
 
 
 

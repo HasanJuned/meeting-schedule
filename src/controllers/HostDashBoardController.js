@@ -47,7 +47,6 @@ exports.mostBooked = async (req, res) => {
 };
 exports.countTodaysMeetings = async (req, res) => {
   try {
-    //const { hostEmail, hostDate } = req.params;
     let hostEmail = req.params.hostEmail;
     let hostDate = req.params.startDate;
 

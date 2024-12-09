@@ -5,14 +5,13 @@ const { DateTime } = require('luxon');
 exports.searchSchedules = async (req, res) => {
   const { date, time, hostName } = req.body;
 
-  const filter = {}; // Initialize the filter object
+  const filter = {};
 
-  // If date is provided, filter by the exact day (ignoring the time)
   if (date) {
     const startOfDay = new Date(date);
     const endOfDay = new Date(startOfDay);
-    endOfDay.setHours(23, 59, 59, 999); // Set the time to the end of the day (23:59:59)
-    filter.startDate = { $gte: startOfDay, $lte: endOfDay }; // Match the date range
+    endOfDay.setHours(23, 59, 59, 999);
+    filter.startDate = { $gte: startOfDay, $lte: endOfDay };
   }
 
   if (time) {
@@ -42,18 +41,38 @@ exports.allSchedules = async (req, res) => {
 
     // Convert date-time fields to desired format
     const convertedSchedules = schedules.map(schedule => {
-      if (schedule.startTime) { // Ensure startTime exists
-        schedule.startTime = DateTime.fromISO(schedule.startTime) // Parse using the given timezone in the input
-            .toFormat('hh:mm a'); // Format to 12-hour time with AM/PM
+      if (schedule.startTime) {
+        schedule.startTime = DateTime.fromISO(schedule.startTime)
+            .toFormat('hh:mm a');
       }
-      if (schedule.endTime) { // Ensure endTime exists
-        schedule.endTime = DateTime.fromISO(schedule.endTime) // Parse using the given timezone in the input
-            .toFormat('hh:mm a'); // Format to 12-hour time with AM/PM
+      if (schedule.endTime) {
+        schedule.endTime = DateTime.fromISO(schedule.endTime)
+            .toFormat('hh:mm a');
       }
       return schedule;
     });
 
     res.status(200).json({ message: 'success', data: convertedSchedules });
+  } catch (error) {
+    res.status(500).json({ message: 'fail', data: error });
+  }
+};
+
+exports.allGuest = async (req, res) => {
+  try {
+    const allGuest = await GuestProfileModel.find();
+    res.status(200).json({ message: 'success', data: allGuest });
+  } catch (error) {
+    res.status(500).json({ message: 'fail', data: error });
+  }
+};
+
+exports.deleteallGuest = async (req, res) => {
+
+  let id = req.params.id;
+  try {
+    const allGuest = await GuestProfileModel.deleteOne({_id: id});
+    res.status(200).json({ message: 'success', data: allGuest });
   } catch (error) {
     res.status(500).json({ message: 'fail', data: error });
   }
@@ -80,28 +99,23 @@ exports.bookSchedule = async (req, res) => {
       return res.status(400).json({ message: 'Conflict with another booked schedule.' });
     }
 
-    // Handle overbooking by checking if the count is 0
     if (schedule.count === 0) {
       return res.status(400).json({ message: 'This schedule is already fully booked.' });
     }
 
-    // Reduce the count of available slots and update the status if no slots are available
     schedule.count -= 1;
     if (schedule.count === 0) {
       schedule.status = 'booked';
     }
 
-    // Save the updated schedule
     await schedule.save();
 
-    // Find the guest profile by email to include their info in the response
     const guestInfo = await GuestProfileModel.findOne({ fullName: guestEmail});
 
     if (!guestInfo) {
       return res.status(404).json({ message: 'Guest not found with this email.' });
     }
 
-    // Send response with both schedule and guest information
     res.status(200).json({
       message: 'Schedule booked successfully.',
       data: {
